@@ -8,7 +8,7 @@ Bu depo, işletme panelinin kodudur (app.agenticreklam.com).
 - **Karşılama sayfası** (`/`)
 - **Marka Beyni kayıt formu** (`/kayit`): 6 grupta 26 soru
 - **Kayıt servisi** (`/api/marka-beyni`): cevapları kontrol eder, logoyu yükler, veritabanına yazar
-- **Veritabanı tablosu**: `supabase/migrations/001_marka_beyni.sql`
+- **Veritabanı tablosu**: `veritabani/migrations/001_marka_beyni.sql`
 
 ## Klasörler
 
@@ -20,13 +20,13 @@ Bu depo, işletme panelinin kodudur (app.agenticreklam.com).
 | `src/pages/` | Sayfalar (dosya adı = adres) |
 | `src/components/` | Sayfalarda tekrar kullanılan parçalar |
 | `src/layouts/` | Ortak sayfa düzeni ve renkler |
-| `supabase/migrations/` | Veritabanı tabloları |
+| `veritabani/migrations/` | Veritabanı tabloları |
 
 ## Kurulum
 
 ### 1. Veritabanı (bir kez)
 
-Supabase'de projeni aç → sol menüden **SQL Editor** → `supabase/migrations/001_marka_beyni.sql`
+Supabase'de projeni aç → sol menüden **SQL Editor** → `veritabani/migrations/001_marka_beyni.sql`
 dosyasının içeriğini yapıştır → **Run**.
 
 ### 2. Vercel'e bağlama
