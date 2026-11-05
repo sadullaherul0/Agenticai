@@ -1,0 +1,102 @@
+---
+import type { Soru } from '@/lib/sorular';
+
+interface Props {
+  soru: Soru;
+}
+const { soru } = Astro.props;
+const varsayilanRenkler = ['#2f4bd8', '#f4b740', '#1d1b18', '#ffffff'];
+---
+<div class="alan" data-alan={soru.id}>
+  {['coklu', 'evethayir', 'renk'].includes(soru.tur) ? (
+    <p class="etiket">
+      {soru.soru}{soru.zorunlu ? <span class="yildiz"> *</span> : <span class="istege"> (isteğe bağlı)</span>}
+    </p>
+  ) : (
+    <label class="etiket" for={soru.id}>
+      {soru.soru}{soru.zorunlu ? <span class="yildiz"> *</span> : <span class="istege"> (isteğe bağlı)</span>}
+    </label>
+  )}
+
+  {soru.tur === 'kisa' && (
+    <input id={soru.id} name={soru.id} type="text" placeholder={soru.ipucu} required={soru.zorunlu} />
+  )}
+  {soru.tur === 'baglanti' && (
+    <input id={soru.id} name={soru.id} type="url" placeholder={soru.ipucu} required={soru.zorunlu} />
+  )}
+  {soru.tur === 'uzun' && (
+    <textarea id={soru.id} name={soru.id} rows="3" placeholder={soru.ipucu} required={soru.zorunlu}></textarea>
+  )}
+  {soru.tur === 'liste' && (
+    <textarea id={soru.id} name={soru.id} rows={soru.max ? Math.max(soru.max, 3) : 5} placeholder={soru.ipucu} required={soru.zorunlu}></textarea>
+  )}
+  {soru.tur === 'sayi' && (
+    <input id={soru.id} name={soru.id} type="number" min={soru.min} max={soru.max} value={soru.min} required={soru.zorunlu} class="kisa-alan" />
+  )}
+  {soru.tur === 'secim' && (
+    <select id={soru.id} name={soru.id} required={soru.zorunlu}>
+      <option value="">Seçiniz</option>
+      {soru.secenekler?.map((s) => <option value={s}>{s}</option>)}
+    </select>
+  )}
+  {soru.tur === 'coklu' && (
+    <div class="secenekler">
+      {soru.secenekler?.map((s) => (
+        <label class="cip"><input type="checkbox" name={soru.id} value={s} /> {s}</label>
+      ))}
+    </div>
+  )}
+  {soru.tur === 'evethayir' && (
+    <div class="secenekler">
+      <label class="cip"><input type="radio" name={soru.id} value="evet" required={soru.zorunlu} /> Evet</label>
+      <label class="cip"><input type="radio" name={soru.id} value="hayir" /> Hayır</label>
+    </div>
+  )}
+  {soru.tur === 'renk' && (
+    <div class="renkler">
+      {Array.from({ length: soru.max ?? 4 }).map((_, i) => (
+        <label class="renk">
+          <input type="color" name={`${soru.id}_${i}`} value={varsayilanRenkler[i]} />
+          {i === 0 ? <span>Ana renk</span> : <span><input type="checkbox" name={`${soru.id}_kullan_${i}`} /> {i + 1}. renk</span>}
+        </label>
+      ))}
+    </div>
+  )}
+  {soru.tur === 'dosya' && (
+    <input id={soru.id} name={soru.id} type="file" accept="image/png,image/jpeg,image/svg+xml,image/webp" required={soru.zorunlu} />
+  )}
+
+  {soru.ipucu && ['liste', 'dosya'].includes(soru.tur) && <p class="ipucu">{soru.ipucu}</p>}
+  <p class="hata" hidden></p>
+</div>
+
+<style>
+  .alan { margin-bottom: 26px; }
+  .etiket { display: block; font-weight: 500; margin: 0 0 8px; }
+  .yildiz { color: var(--vurgu); }
+  .istege { color: var(--soluk); font-weight: 400; font-size: 14px; }
+  input[type='text'], input[type='url'], input[type='number'], select, textarea {
+    width: 100%;
+    font: inherit;
+    color: var(--yazi);
+    background: var(--zemin);
+    border: 1px solid var(--cizgi);
+    border-radius: 8px;
+    padding: 11px 12px;
+  }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--vurgu); outline-offset: 1px; }
+  .kisa-alan { max-width: 120px; }
+  textarea { resize: vertical; }
+  .secenekler { display: flex; flex-wrap: wrap; gap: 8px; }
+  .cip {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--cizgi); border-radius: 999px;
+    padding: 7px 14px; cursor: pointer; background: var(--zemin);
+  }
+  .cip:has(input:checked) { border-color: var(--vurgu); background: var(--vurgu-acik); }
+  .renkler { display: flex; flex-wrap: wrap; gap: 14px; }
+  .renk { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--soluk); }
+  .renk input[type='color'] { width: 44px; height: 44px; border: 1px solid var(--cizgi); border-radius: 8px; padding: 2px; background: none; cursor: pointer; }
+  .ipucu { color: var(--soluk); font-size: 14px; margin: 6px 0 0; }
+  .hata { color: var(--hata); font-size: 14px; margin: 6px 0 0; }
+</style>

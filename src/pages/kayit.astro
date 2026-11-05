@@ -1,0 +1,88 @@
+---
+import Duzen from '@/layouts/Duzen.astro';
+import SoruAlani from '@/components/SoruAlani.astro';
+import { SORU_GRUPLARI } from '@/lib/sorular';
+---
+<Duzen baslik="Marka Beyni">
+  <h1>Marka Beyni</h1>
+  <p class="giris">
+    Yıldızlı sorular zorunlu. İsteğe bağlı olanları şimdi atlayıp sonra panelden doldurabilirsiniz.
+  </p>
+
+  <form id="marka-formu" method="post" action="/api/marka-beyni" enctype="multipart/form-data" novalidate>
+    {SORU_GRUPLARI.map((grup, i) => (
+      <section class="grup">
+        <h2><span class="no">{i + 1}</span>{grup.baslik}</h2>
+        {grup.sorular.map((soru) => <SoruAlani soru={soru} />)}
+      </section>
+    ))}
+
+    <p class="genel-hata" hidden></p>
+    <button class="buton" type="submit">Kaydet</button>
+  </form>
+</Duzen>
+
+<style>
+  .grup {
+    background: var(--kart);
+    border: 1px solid var(--cizgi);
+    border-radius: var(--radius);
+    padding: 24px 20px 4px;
+    margin-bottom: 20px;
+  }
+  h2 {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 19px; font-weight: 600; margin: 0 0 22px;
+  }
+  .no {
+    display: inline-grid; place-items: center;
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--vurgu-acik); color: var(--vurgu);
+    font-size: 14px;
+  }
+  .genel-hata { color: var(--hata); font-weight: 500; }
+</style>
+
+<script>
+  // Formu sayfa yenilenmeden gönderir; hata varsa ilgili sorunun altında gösterir.
+  const form = document.getElementById('marka-formu') as HTMLFormElement;
+  const buton = form.querySelector('button[type="submit"]') as HTMLButtonElement;
+  const genelHata = form.querySelector('.genel-hata') as HTMLElement;
+
+  form.addEventListener('submit', async (olay) => {
+    olay.preventDefault();
+    form.querySelectorAll<HTMLElement>('.hata').forEach((h) => { h.hidden = true; h.textContent = ''; });
+    genelHata.hidden = true;
+    buton.disabled = true;
+    buton.textContent = 'Kaydediliyor…';
+
+    try {
+      const yanit = await fetch(form.action, { method: 'POST', body: new FormData(form) });
+      if (yanit.redirected || yanit.ok) {
+        window.location.href = yanit.url;
+        return;
+      }
+      const { hatalar } = (await yanit.json()) as { hatalar: Record<string, string> };
+      let ilk: HTMLElement | null = null;
+      for (const [id, mesaj] of Object.entries(hatalar)) {
+        const alan = form.querySelector<HTMLElement>(`[data-alan="${id}"]`);
+        const kutu = alan?.querySelector<HTMLElement>('.hata');
+        if (alan && kutu) {
+          kutu.textContent = mesaj;
+          kutu.hidden = false;
+          ilk ??= alan;
+        } else {
+          genelHata.textContent = mesaj;
+          genelHata.hidden = false;
+        }
+      }
+      (ilk ?? genelHata).scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } catch {
+      genelHata.textContent = 'Bağlantı sorunu oluştu, lütfen tekrar deneyin.';
+      genelHata.hidden = false;
+    } finally {
+      buton.disabled = false;
+      buton.textContent = 'Kaydet';
+    }
+  });
+</script>

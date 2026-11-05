@@ -1,0 +1,16 @@
+# build çıktıları
+dist/
+.astro/
+.vercel/
+
+# bağımlılıklar
+node_modules/
+
+# gizli bilgiler
+.env
+.env.*
+!.env.example
+
+# sistem dosyaları
+.DS_Store
+npm-debug.log*
